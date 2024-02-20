@@ -1,0 +1,4 @@
+---
+ansible_user: server
+ansible_password: server!
+ansible_sudo_pass: server!

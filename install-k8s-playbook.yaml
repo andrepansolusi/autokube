@@ -1,0 +1,40 @@
+---
+- name: Install K8s Package
+  hosts: master
+  tasks:
+  - name: Update Repository
+    become: true
+    ansible.builtin.apt:
+    update_cache: yes
+  - name: Disable swaap
+    become: true
+    ansible.builtin.shell: swapoff -a
+  - name: install APT Transport HTTPS
+    become: true
+    ansible.builtin.apt:
+     name: apt-transport-https
+     state: present
+  - name: add Docker apt-key
+    get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker-apt-keyring.asc
+        mode: '0644'
+        force: true
+  - name: add Docker's APT repository
+      apt_repository:
+        repo: "deb [arch={{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' }} signed-by=/etc/apt/keyrings/docker-apt-keyring.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        update_cache: yes
+
+    - name: add Kubernetes apt-key
+      get_url:
+        url: https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key
+        dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
+        mode: '0644'
+        force: true
+
+    - name: add Kubernetes' APT repository
+      apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /"
+        state: present
+        update_cache: yes
